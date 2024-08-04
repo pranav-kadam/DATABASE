@@ -32,7 +32,7 @@ def extract_webpage_data(link):
 
     return data
 
-def save_to_excel(data):
+def save_to_excel(all_data):
     wb = Workbook()
     ws = wb.active
     ws.title = "Stanford Profile Data"
@@ -40,23 +40,29 @@ def save_to_excel(data):
     headers = ["Name", "Course", "Email"]
     ws.append(headers)
     
-    for row in data:
-        ws.append(row)
+    for sheet_number, data in enumerate(all_data, start=1):
+        ws = wb.create_sheet(title=f"Page {sheet_number}")
+        ws.append(headers)
+        for row in data:
+            ws.append(row)
     
-    wb.save("stanford_profile_data1.xlsx")
-    print("Data saved to stanford_profile_data1.xlsx")
+    wb.save("stanford_profile_data.xlsx")
+    print("Data saved to stanford_profile_data.xlsx")
 
 def main():
-    link = input("Enter the Stanford profile webpage link: ")
-    
-    try:
-        data = extract_webpage_data(link)
-        print("Extracted data:")
-        for name, course, email in data:
-            print(f"Name: {name}\nCourse: {course}\nEmail: {email}\n")
-        save_to_excel(data)
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+    base_url = "https://profiles.stanford.edu/browse/school-of-engineering?p={}&ps=100"
+    all_data = []
+
+    for i in range(1, 65):
+        link = base_url.format(i)
+        try:
+            data = extract_webpage_data(link)
+            all_data.append(data)
+            print(f"Extracted data from page {i}")
+        except Exception as e:
+            print(f"An error occurred on page {i}: {str(e)}")
+
+    save_to_excel(all_data)
 
 if __name__ == "__main__":
     main()
